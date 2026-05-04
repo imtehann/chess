@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REGIUM — Cinematic Chess</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ── LOADING SCREEN ─────────────────────────────────── -->
+  <div id="loading-screen">
+    <canvas id="loading-canvas"></canvas>
+    <div class="loading-inner">
+      <div class="loading-crown">♛</div>
+      <div class="loading-logo">REGIUM</div>
+      <div class="loading-tagline">A Cinematic Chess Experience</div>
+      <div class="loading-bar-wrap">
+        <div class="loading-bar"><div class="loading-fill" id="loading-fill"></div></div>
+      </div>
+      <div class="loading-status" id="loading-status">Preparing board…</div>
+    </div>
+  </div>
+
+  <!-- ── MAIN MENU ──────────────────────────────────────── -->
+  <div id="main-menu" class="screen hidden">
+    <canvas id="menu-canvas"></canvas>
+
+    <div class="menu-overlay">
+      <header class="menu-header">
+        <div class="menu-logo-wrap">
+          <span class="menu-crown">♛</span>
+          <h1 class="menu-title">REGIUM</h1>
+          <p class="menu-sub">Cinematic Chess</p>
+        </div>
+      </header>
+
+      <nav class="menu-nav">
+        <button class="menu-btn primary" id="btn-pva">
+          <span class="btn-icon">⚔</span>
+          <div class="btn-body">
+            <span class="btn-label">vs Computer</span>
+            <span class="btn-hint">Challenge Stockfish AI</span>
+          </div>
+        </button>
+        <button class="menu-btn" id="btn-pvp">
+          <span class="btn-icon">♟</span>
+          <div class="btn-body">
+            <span class="btn-label">vs Player</span>
+            <span class="btn-hint">Local two-player</span>
+          </div>
+        </button>
+        <button class="menu-btn" id="btn-analysis">
+          <span class="btn-icon">◎</span>
+          <div class="btn-body">
+            <span class="btn-label">Analysis</span>
+            <span class="btn-hint">Review saved games</span>
+          </div>
+        </button>
+      </nav>
+
+      <div class="menu-season-bar">
+        <span class="season-label">ENVIRONMENT</span>
+        <div class="season-tabs" id="menu-season-tabs">
+          <button class="stab active" data-season="winter"><span>❄</span>Winter</button>
+          <button class="stab" data-season="summer"><span>☀</span>Summer</button>
+          <button class="stab" data-season="rainy"><span>⛈</span>Rainy</button>
+          <button class="stab" data-season="autumn"><span>🍂</span>Autumn</button>
+        </div>
+      </div>
+
+      <footer class="menu-footer">
+        <span>Powered by Stockfish 14 · chess.js</span>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ── GAME SCREEN ────────────────────────────────────── -->
+  <div id="game-screen" class="screen hidden">
+    <!-- Environment (background) -->
+    <canvas id="env-canvas"></canvas>
+
+    <div class="game-layout">
+
+      <!-- LEFT PANEL -->
+      <aside class="side-panel left-panel">
+        <!-- Top player (opponent) -->
+        <div class="player-card" id="top-player-card">
+          <div class="player-avi" id="top-avi">♛</div>
+          <div class="player-meta">
+            <div class="player-name" id="top-name">Black</div>
+            <div class="captured-row" id="top-captured"></div>
+          </div>
+          <div class="player-clock" id="top-clock">—</div>
+        </div>
+
+        <!-- Evaluation bar -->
+        <div class="eval-container">
+          <div class="eval-bar-wrap">
+            <div class="eval-bar" id="eval-bar">
+              <div class="eval-seg white-seg" id="eval-white"></div>
+              <div class="eval-seg black-seg" id="eval-black"></div>
+            </div>
+          </div>
+          <div class="eval-score" id="eval-score">0.0</div>
+          <div class="eval-label" id="eval-label">Equal</div>
+        </div>
+
+        <!-- Bottom player (you) -->
+        <div class="player-card" id="bottom-player-card">
+          <div class="player-avi" id="bottom-avi">♙</div>
+          <div class="player-meta">
+            <div class="player-name" id="bottom-name">White</div>
+            <div class="captured-row" id="bottom-captured"></div>
+          </div>
+          <div class="player-clock" id="bottom-clock">—</div>
+        </div>
+
+        <!-- Best move hint -->
+        <div class="hint-box" id="hint-box">
+          <div class="hint-label">Best Move</div>
+          <div class="hint-move" id="hint-move">—</div>
+        </div>
+      </aside>
+
+      <!-- BOARD -->
+      <main class="board-area">
+        <div class="board-tilt-wrap" id="board-tilt">
+          <div class="board-frame">
+            <canvas id="board-canvas"></canvas>
+            <canvas id="overlay-canvas"></canvas>
+          </div>
+        </div>
+        <!-- Coordinate labels -->
+        <div class="coord-files" id="coord-files"></div>
+        <div class="coord-ranks" id="coord-ranks"></div>
+      </main>
+
+      <!-- RIGHT PANEL -->
+      <aside class="side-panel right-panel">
+        <!-- Controls -->
+        <div class="ctrl-bar">
+          <button class="ctrl-btn" id="btn-undo" title="Undo (Ctrl+Z)">↩</button>
+          <button class="ctrl-btn" id="btn-redo" title="Redo">↪</button>
+          <button class="ctrl-btn" id="btn-restart" title="New game">↺</button>
+          <button class="ctrl-btn" id="btn-flip" title="Flip board">⇅</button>
+          <button class="ctrl-btn" id="btn-analyze" title="Analysis">◎</button>
+          <button class="ctrl-btn" id="btn-menu" title="Main menu">⌂</button>
+        </div>
+
+        <!-- Move list -->
+        <div class="move-panel">
+          <div class="panel-head">Move History</div>
+          <div class="move-list" id="move-list"></div>
+        </div>
+
+        <!-- Difficulty (PvA) -->
+        <div class="diff-panel" id="diff-panel">
+          <div class="panel-head">AI Difficulty</div>
+          <div class="diff-row">
+            <span class="diff-tag">Novice</span>
+            <input type="range" min="1" max="20" value="10" id="diff-slider" class="diff-slider">
+            <span class="diff-tag">Master</span>
+          </div>
+          <div class="diff-val" id="diff-val">Level 10</div>
+        </div>
+
+        <!-- Season switcher -->
+        <div class="mini-season" id="game-season-tabs">
+          <button class="mstab active" data-season="winter">❄</button>
+          <button class="mstab" data-season="summer">☀</button>
+          <button class="mstab" data-season="rainy">⛈</button>
+          <button class="mstab" data-season="autumn">🍂</button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ── ANALYSIS OVERLAY ─── -->
+    <div class="overlay-panel hidden" id="analysis-overlay">
+      <div class="overlay-inner analysis-inner">
+        <div class="overlay-head">
+          <h2>Game Analysis</h2>
+          <button class="close-btn" id="close-analysis">✕</button>
+        </div>
+        <div class="analysis-body">
+          <div class="acc-row">
+            <div class="acc-card">
+              <div class="acc-piece">♙</div>
+              <div class="acc-pct" id="white-acc">—</div>
+              <div class="acc-lbl">White Accuracy</div>
+            </div>
+            <div class="acc-divider">vs</div>
+            <div class="acc-card">
+              <div class="acc-piece">♟</div>
+              <div class="acc-pct" id="black-acc">—</div>
+              <div class="acc-lbl">Black Accuracy</div>
+            </div>
+          </div>
+          <canvas id="eval-graph" width="480" height="110"></canvas>
+          <div class="move-class-legend">
+            <span class="mcl brilliant">!! Brilliant</span>
+            <span class="mcl great">! Great</span>
+            <span class="mcl good">⊕ Good</span>
+            <span class="mcl inaccuracy">? Inaccuracy</span>
+            <span class="mcl mistake">?? Mistake</span>
+            <span class="mcl blunder">× Blunder</span>
+          </div>
+          <div class="classified-list" id="classified-list"></div>
+          <div class="pgn-block">
+            <div class="panel-head">PGN Export</div>
+            <textarea id="pgn-out" readonly spellcheck="false"></textarea>
+            <button class="action-btn" id="btn-copy-pgn">Copy PGN</button>
+            <button class="action-btn" id="btn-load-pgn">Load PGN</button>
+            <textarea id="pgn-in" placeholder="Paste PGN here to load…" spellcheck="false"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROMOTION DIALOG ─── -->
+    <div class="overlay-panel hidden" id="promo-dialog">
+      <div class="overlay-inner promo-inner">
+        <div class="promo-title">Promote Pawn</div>
+        <div class="promo-pieces" id="promo-pieces">
+          <button class="promo-btn" data-piece="q">♛</button>
+          <button class="promo-btn" data-piece="r">♜</button>
+          <button class="promo-btn" data-piece="b">♝</button>
+          <button class="promo-btn" data-piece="n">♞</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GAME OVER DIALOG ─── -->
+    <div class="overlay-panel hidden" id="gameover-dialog">
+      <div class="overlay-inner gameover-inner">
+        <div class="go-symbol" id="go-symbol">♛</div>
+        <div class="go-title" id="go-title">Checkmate</div>
+        <div class="go-sub" id="go-sub">White wins!</div>
+        <div class="go-actions">
+          <button class="menu-btn primary" id="go-replay">Play Again</button>
+          <button class="menu-btn" id="go-analyze">Analyze</button>
+          <button class="menu-btn" id="go-menu">Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MOVE CLASSIFICATION TOAST ─── -->
+    <div class="move-toast hidden" id="move-toast">
+      <span id="toast-icon">!</span>
+      <span id="toast-text">Great move</span>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+  <!-- Modules (order matters) -->
+  <script src="effects.js"></script>
+  <script src="board.js"></script>
+  <script src="engine.js"></script>
+  <script src="ui.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
