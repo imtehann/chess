@@ -1,7 +1,3 @@
-/**
- * ui.js — UI Management: Panels, Dialogs, Analysis, Timers
- */
-
 const UI = (() => {
   // ---- MOVE QUALITY ----
   const QUALITIES = {
