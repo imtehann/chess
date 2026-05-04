@@ -1,3 +1,8 @@
+/**
+ * effects.js — Seasonal Environment Rendering
+ * Manages: background canvas, particles, trees, weather
+ */
+
 class EnvironmentRenderer {
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
