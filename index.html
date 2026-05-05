@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grandmaster Cinematic 2.5D</title>
+    <link rel="stylesheet" href="chess_app_style.css">
+    <!-- Logic Engines -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+</head>
+<body>
+    <canvas id="env-canvas" class="env-layer"></canvas>
+    <div id="lighting-overlay" class="lighting-layer"></div>
+
+    <div id="menu-overlay" class="menu-overlay glass-panel">
+        <div class="menu-content">
+            <h1 class="accent">Grandmaster <span class="white">Cinematic</span></h1>
+            <div class="mode-selection">
+                <button id="pve-btn" class="btn-primary">Start Game</button>
+            </div>
+            <div class="theme-grid">
+                <button data-theme="winter">Winter</button>
+                <button data-theme="summer">Summer</button>
+                <button data-theme="rainy">Rainy</button>
+                <button data-theme="autumn">Autumn</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <main class="game-layout">
+            <aside class="eval-container glass-panel">
+                <div class="eval-bar">
+                    <div id="eval-fill" class="eval-fill" style="height: 50%;"></div>
+                </div>
+                <span class="eval-text">0.0</span>
+                <canvas id="eval-graph" width="40" height="200"></canvas>
+            </aside>
+
+            <section class="board-scene">
+                <div class="perspective-container">
+                    <div id="board" class="chess-board"></div>
+                </div>
+            </section>
+
+            <aside class="info-panel">
+                <div class="status-card glass-panel">
+                    <div id="turn-indicator" class="turn-indicator white-turn">
+                        <div class="turn-dot"></div>
+                        <span id="turn-text">WHITE TO MOVE</span>
+                    </div>
+                </div>
+
+                <div class="history-container glass-panel">
+                    <h3>Analysis & History</h3>
+                    <div id="move-history" class="move-list"></div>
+                </div>
+
+                <div class="controls glass-panel">
+                    <button id="undo-btn" class="btn-secondary">Undo</button>
+                    <button id="export-btn" class="btn-secondary">Export PGN</button>
+                    <button id="reset-btn" class="btn-primary">New Game</button>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script type="module" src="chess_app_main.js"></script>
+</body>
+</html>
