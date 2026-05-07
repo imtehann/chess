@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cinematic Chess</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- MENU SCREEN -->
+  <div id="menu-screen" class="screen active">
+    <canvas id="menu-bg-canvas"></canvas>
+    <div class="menu-content">
+      <div class="menu-logo">
+        <div class="logo-crown">&#9819;</div>
+        <h1 class="logo-title">Cinematic Chess</h1>
+        <p class="logo-sub">A cinematic chess experience</p>
+      </div>
+      <div class="menu-buttons">
+        <button type="button" class="menu-btn primary" id="btn-vs-ai">
+          <span class="btn-icon">&#9876;</span>
+          <span class="btn-text">
+            <span class="btn-label">Player vs AI</span>
+            <span class="btn-sub">Challenge Stockfish</span>
+          </span>
+        </button>
+        <button type="button" class="menu-btn" id="btn-vs-human">
+          <span class="btn-icon">&#9823;</span>
+          <span class="btn-text">
+            <span class="btn-label">Player vs Player</span>
+            <span class="btn-sub">Local two-player</span>
+          </span>
+        </button>
+        <button type="button" class="menu-btn" id="btn-analysis">
+          <span class="btn-icon">&#128269;</span>
+          <span class="btn-text">
+            <span class="btn-label">Analysis Mode</span>
+            <span class="btn-sub">Review &amp; explore</span>
+          </span>
+        </button>
+      </div>
+      <div class="menu-settings">
+        <div class="setting-group">
+          <label class="setting-label">Difficulty</label>
+          <div class="difficulty-selector" id="difficulty-selector">
+            <button type="button" class="diff-btn active" data-depth="3"  data-skill="3">Beginner</button>
+            <button type="button" class="diff-btn"        data-depth="8"  data-skill="10">Intermediate</button>
+            <button type="button" class="diff-btn"        data-depth="14" data-skill="17">Advanced</button>
+            <button type="button" class="diff-btn"        data-depth="20" data-skill="20">Master</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label class="setting-label">Season</label>
+          <div class="theme-selector" id="theme-selector">
+            <button type="button" class="theme-btn active" data-theme="winter">&#10052; Winter</button>
+            <button type="button" class="theme-btn"        data-theme="summer">&#9728; Summer</button>
+            <button type="button" class="theme-btn"        data-theme="rainy">&#127783; Monsoon</button>
+            <button type="button" class="theme-btn"        data-theme="autumn">&#127810; Autumn</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game-screen" class="screen">
+
+    <canvas id="env-canvas"></canvas>
+
+    <header class="top-bar" aria-label="Game controls">
+      <button type="button" class="icon-btn" id="btn-menu-back"    title="Menu">&#9776;</button>
+      <div class="game-info">
+        <span id="game-mode-label">Player vs AI</span>
+        <span class="separator">&#183;</span>
+        <span id="current-theme-label">Winter</span>
+      </div>
+      <div class="top-controls">
+        <button type="button" class="icon-btn" id="btn-theme-cycle"  title="Change Season">&#127758;</button>
+        <button type="button" class="icon-btn" id="btn-sound-toggle" title="Sound">&#128266;</button>
+        <button type="button" class="icon-btn" id="btn-undo"         title="Undo">&#8634;</button>
+        <button type="button" class="icon-btn" id="btn-redo"         title="Redo">&#8635;</button>
+        <button type="button" class="icon-btn" id="btn-restart"      title="Restart">&#10227;</button>
+      </div>
+    </header>
+
+    <main class="game-layout" aria-label="Chess game">
+
+      <aside class="panel panel-left" id="panel-left" aria-label="Move history">
+        <div class="panel-header">Move History</div>
+        <div class="move-history-scroll">
+          <table class="move-table" id="move-table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">White</th>
+                <th scope="col">Black</th>
+              </tr>
+            </thead>
+            <tbody id="move-table-body"></tbody>
+          </table>
+        </div>
+        <div class="panel-footer">
+          <button type="button" class="text-btn" id="btn-export-pgn">Export PGN</button>
+          <button type="button" class="text-btn" id="btn-analyze">Analyze</button>
+        </div>
+      </aside>
+
+      <section class="board-section" aria-label="Chess board">
+        <div class="eval-bar-wrapper">
+          <div class="eval-bar-container">
+            <div class="eval-bar" id="eval-bar" role="meter" aria-label="Evaluation">
+              <div class="eval-fill white" id="eval-fill-white"></div>
+              <div class="eval-fill black" id="eval-fill-black"></div>
+            </div>
+            <div class="eval-score" id="eval-score">0.0</div>
+          </div>
+        </div>
+
+        <div class="player-bar top-player" id="player-black-bar">
+          <div class="player-avatar">&#9819;</div>
+          <div class="player-info">
+            <span class="player-name" id="black-player-name">Black</span>
+            <span class="captured-pieces" id="black-captured"></span>
+          </div>
+          <div class="player-score" id="black-material-score"></div>
+          <div class="thinking-indicator" id="ai-thinking" role="status" aria-live="polite">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+        </div>
+
+        <div class="board-perspective-wrapper">
+          <div class="board-glow"></div>
+          <div id="chessboard-container">
+            <div class="coord-row coord-top"    id="coord-top"></div>
+            <div class="board-row-wrapper">
+              <div class="coord-col coord-left"  id="coord-left"></div>
+              <div id="chessboard" role="grid" aria-label="Chess board"></div>
+              <div class="coord-col coord-right" id="coord-right"></div>
+            </div>
+            <div class="coord-row coord-bottom" id="coord-bottom"></div>
+          </div>
+        </div>
+
+        <div class="player-bar bottom-player" id="player-white-bar">
+          <div class="player-avatar">&#9812;</div>
+          <div class="player-info">
+            <span class="player-name" id="white-player-name">White</span>
+            <span class="captured-pieces" id="white-captured"></span>
+          </div>
+          <div class="player-score" id="white-material-score"></div>
+        </div>
+      </section>
+
+      <aside class="panel panel-right" id="panel-right" aria-label="Engine analysis">
+        <div class="panel-header">Engine Analysis</div>
+        <div class="engine-panel">
+          <div class="best-move-display" id="best-move-display">
+            <div class="bm-label">Best Move</div>
+            <div class="bm-value" id="best-move-value">&#8212;</div>
+          </div>
+          <div class="depth-display">
+            <span class="depth-label">Depth</span>
+            <span class="depth-value" id="engine-depth">&#8212;</span>
+          </div>
+          <div class="pv-line" id="pv-line"></div>
+        </div>
+        <div class="eval-graph-container">
+          <div class="panel-sub-header">Evaluation Graph</div>
+          <canvas id="eval-graph" width="220" height="120" role="img" aria-label="Evaluation graph"></canvas>
+        </div>
+        <div class="accuracy-section" id="accuracy-section" style="display:none">
+          <div class="panel-sub-header">Accuracy</div>
+          <div class="accuracy-row">
+            <div class="accuracy-item white-acc">
+              <div class="acc-label">White</div>
+              <div class="acc-value" id="white-accuracy">&#8212;</div>
+            </div>
+            <div class="accuracy-item black-acc">
+              <div class="acc-label">Black</div>
+              <div class="acc-value" id="black-accuracy">&#8212;</div>
+            </div>
+          </div>
+          <div class="classification-legend">
+            <span class="cls-item brilliant">!! Brilliant</span>
+            <span class="cls-item great">! Great</span>
+            <span class="cls-item good">Good</span>
+            <span class="cls-item inaccuracy">? Inaccuracy</span>
+            <span class="cls-item mistake">?! Mistake</span>
+            <span class="cls-item blunder">?? Blunder</span>
+          </div>
+        </div>
+      </aside>
+
+    </main>
+
+    <div id="status-overlay" class="status-overlay hidden" role="dialog" aria-modal="true" aria-label="Game result">
+      <div class="status-box">
+        <div class="status-icon" id="status-icon">&#9819;</div>
+        <div class="status-title" id="status-title">Check!</div>
+        <div class="status-sub"   id="status-sub"></div>
+        <div class="status-actions">
+          <button type="button" class="menu-btn primary small" id="btn-new-game">New Game</button>
+          <button type="button" class="menu-btn small"         id="btn-back-menu">Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="promotion-dialog" class="promotion-dialog hidden" role="dialog" aria-modal="true" aria-label="Promote pawn">
+      <div class="promo-title">Promote Pawn</div>
+      <div class="promo-choices" id="promo-choices"></div>
+    </div>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="effects.js"></script>
+  <script src="engine.js"></script>
+  <script src="board.js"></script>
+  <script src="ui.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
